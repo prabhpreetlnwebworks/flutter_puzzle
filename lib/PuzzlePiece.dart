@@ -13,15 +13,16 @@ class PuzzlePiece extends StatefulWidget {
   final Function sendToBack;
 
   PuzzlePiece(
-      {Key key,
-      @required this.image,
-      @required this.imageSize,
-      @required this.row,
-      @required this.col,
-      @required this.maxRow,
-      @required this.maxCol,
-      @required this.bringToTop,
-      @required this.sendToBack})
+      {Key? key,
+      required this.image,
+      required this.imageSize,
+      required this.row,
+      required this.col,
+      required this.maxRow,
+      required this.maxCol,
+      required this.bringToTop,
+      required this.sendToBack
+      })
       : super(key: key);
 
   @override
@@ -31,12 +32,14 @@ class PuzzlePiece extends StatefulWidget {
 }
 
 class PuzzlePieceState extends State<PuzzlePiece> {
-  double top;
-  double left;
+  late double top;
+  late double left;
   bool isMovable = true;
 
   @override
-  Widget build(BuildContext context) {
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
     final imageWidth = MediaQuery.of(context).size.width;
     final imageHeight = MediaQuery.of(context).size.height *
         MediaQuery.of(context).size.width /
@@ -44,54 +47,56 @@ class PuzzlePieceState extends State<PuzzlePiece> {
     final pieceWidth = imageWidth / widget.maxCol;
     final pieceHeight = imageHeight / widget.maxRow;
 
-    if (top == null) {
-      top = Random().nextInt((imageHeight - pieceHeight).ceil()).toDouble();
-      top -= widget.row * pieceHeight;
-    }
-    if (left == null) {
-      left = Random().nextInt((imageWidth - pieceWidth).ceil()).toDouble();
-      left -= widget.col * pieceWidth;
-    }
+    // Initialize top and left with random positions
+    top = Random().nextDouble() * (imageHeight - pieceHeight);
+    top -= widget.row * pieceHeight;
+
+    left = Random().nextDouble() * (imageWidth - pieceWidth);
+    left -= widget.col * pieceWidth;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final imageWidth = MediaQuery.of(context).size.width;
+    final imageHeight = MediaQuery.of(context).size.height *
+        MediaQuery.of(context).size.width /
+        widget.imageSize.width;
 
     return Positioned(
       top: top,
       left: left,
       width: imageWidth,
       child: GestureDetector(
-        onTap: () {
-          if (isMovable) {
-            widget.bringToTop(widget);
-          }
-        },
-        onPanStart: (_) {
-          if (isMovable) {
-            widget.bringToTop(widget);
-          }
-        },
-        onPanUpdate: (dragUpdateDetails) {
-          if (isMovable) {
-            setState(() {
-              top += dragUpdateDetails.delta.dy;
-              left += dragUpdateDetails.delta.dx;
+          onTap: () {
+            if (isMovable) {
+              widget.bringToTop(widget);
+            }
+          },
+          onPanStart: (_) {
+            if (isMovable) {
+              widget.bringToTop(widget);
+            }
+          },
+          onPanUpdate: (dragUpdateDetails) {
+            if (isMovable) {
+              setState(() {
+                top += dragUpdateDetails.delta.dy;
+                left += dragUpdateDetails.delta.dx;
 
-              if (-10 < top && top < 10 && -10 < left && left < 10) {
-                top = 0;
-                left = 0;
-                isMovable = false;
-                widget.sendToBack(widget);
-              }
-            });
-          }
-        },
-        child: ClipPath(
-          child: CustomPaint(
-              foregroundPainter: PuzzlePiecePainter(
-                  widget.row, widget.col, widget.maxRow, widget.maxCol),
-              child: widget.image),
-          clipper: PuzzlePieceClipper(
-              widget.row, widget.col, widget.maxRow, widget.maxCol),
+                if(-10 < top && top < 10 && -10 < left && left < 10) {
+                  top = 0;
+                  left = 0;
+                  isMovable = false;
+                  widget.sendToBack(widget);
+                }
+              });
+            }
+          },
+          child: ClipPath(
+            child: widget.image,
+            clipper: PuzzlePieceClipper(widget.row, widget.col, widget.maxRow, widget.maxCol),
+          ),
         ),
-      ),
     );
   }
 }

@@ -45,5 +45,9 @@
     <string>The app needs to access the Photo Library in order to be able to load images from it.</string>
     <key>NSCameraUsageDescription</key>
     <string>The app needs to access the Camera in order to be able to get images from it.</string>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
 </dict>
 </plist>
