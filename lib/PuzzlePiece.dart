@@ -11,6 +11,7 @@ class PuzzlePiece extends StatefulWidget {
   final int maxCol;
   final Function bringToTop;
   final Function sendToBack;
+  final Function puzzleSolved;
 
   PuzzlePiece(
       {Key? key,
@@ -21,7 +22,8 @@ class PuzzlePiece extends StatefulWidget {
       required this.maxRow,
       required this.maxCol,
       required this.bringToTop,
-      required this.sendToBack
+      required this.sendToBack,
+      required this.puzzleSolved
       })
       : super(key: key);
 
@@ -88,6 +90,7 @@ class PuzzlePieceState extends State<PuzzlePiece> {
                   left = 0;
                   isMovable = false;
                   widget.sendToBack(widget);
+                  widget.puzzleSolved(widget);
                 }
               });
             }

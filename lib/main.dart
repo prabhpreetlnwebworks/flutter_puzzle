@@ -36,9 +36,10 @@ class _MyHomePageState extends State<MyHomePage> {
   XFile? _image;
   List<Widget> pieces = [];
   final ImagePicker picker = ImagePicker();
+  int placedPieces = 0;
 
   Future getImage(ImageSource source) async {
-    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    final XFile? image = await picker.pickImage(source: source);
 
     if (image != null) {
       // Convert XFile to File
@@ -88,7 +89,8 @@ class _MyHomePageState extends State<MyHomePage> {
               maxRow: widget.rows,
               maxCol: widget.cols,
               bringToTop: this.bringToTop,
-              sendToBack: this.sendToBack));
+              sendToBack: this.sendToBack,
+              puzzleSolved: this.puzzleSolved));
         });
       }
     }
@@ -109,11 +111,48 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  void puzzleSolved(Widget widget) {
+    setState(() {
+      placedPieces++;
+    });
+    // Check if all pieces are placed
+    if (placedPieces == this.widget.rows * this.widget.cols) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Congratulations!'),
+            content: Text('You have completed the puzzle!'),
+            actions: <Widget>[
+              TextButton(
+                child: Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
+        leading: IconButton(
+          icon: Icon(Icons.refresh),
+          onPressed: () {
+            setState(() {
+              final File fileImage = File(_image!.path);
+              placedPieces = 0;
+              pieces.clear();
+              splitImage(Image.file(fileImage));
+            });
+          },
+        ),
       ),
       body: SafeArea(
         child: new Center(
